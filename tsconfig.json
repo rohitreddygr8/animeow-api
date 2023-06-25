@@ -1,0 +1,34 @@
+{
+    "compilerOptions": {
+        "allowJs": true,
+        "strict": true,
+        "module": "ESNext",
+        "moduleResolution": "node",
+        "target": "ES2017",
+        "esModuleInterop": true,
+        "removeComments": true,
+        "preserveWatchOutput": false,
+        "allowSyntheticDefaultImports": true,
+        "forceConsistentCasingInFileNames": true,
+        "resolveJsonModule": true,
+        "isolatedModules": true,
+        "noImplicitReturns": true,
+        "noImplicitAny": true,
+        "noImplicitThis": true,
+        "noEmitOnError": true,
+        "incremental": true,
+        "outDir": "./dist",
+    },
+    "include": [
+        "src",
+        "public"
+    ],
+    "exclude": [
+        "node_modules",
+        "dist",
+    ],
+    "ts-node": {
+        "esm": true,
+        "swc": true,
+    }
+}
