@@ -7,7 +7,12 @@ import jwt from 'jsonwebtoken';
 import { authRoles, env } from '../constants/index.js';
 import { authService, userService } from '../services/index.js';
 import { LoginRequestBody, SignUpRequestBody } from '../types/index.js';
-import { DatabaseError, getHash, getHashAndSalt } from '../utils/index.js';
+import {
+	DatabaseError,
+	getHash,
+	getHashAndSalt,
+	getRandomNumber,
+} from '../utils/index.js';
 
 const refreshTokenCookieOptions: CookieSerializeOptions = {
 	httpOnly: true,
@@ -71,7 +76,12 @@ export const signUp: RouteHandler<{ Body: SignUpRequestBody }> = async (
 	try {
 		const user = await userService.createUser({
 			email,
-			username: username ?? 'user',
+			username:
+				username ??
+				`${email.split('@')[0].replace(/[^a-zA-Z0-9\s]/g, '')}${getRandomNumber(
+					0,
+					10000,
+				)}`,
 			password_hash: hash,
 			salt,
 			role: authRoles.USER,
