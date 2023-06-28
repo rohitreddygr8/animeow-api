@@ -1,9 +1,8 @@
 import { FastifyPluginAsync, RouteHandler } from 'fastify';
-import httpStatus from 'http-status';
 
 import { authRoles } from '../../constants/index.js';
 import { authController } from '../../controllers/index.js';
-import { auth, validate } from '../../middleware/index.js';
+import { checkAuth, validate } from '../../middleware/index.js';
 import { authValidation } from '../../validations/index.js';
 
 export const authRouterPlugin: FastifyPluginAsync = async (app) => {
@@ -15,7 +14,7 @@ export const authRouterPlugin: FastifyPluginAsync = async (app) => {
 
 	app.post(
 		'/log-out',
-		{ preHandler: auth(authRoles.USER) },
+		{ preHandler: checkAuth(authRoles.USER) },
 		authController.logOut as RouteHandler,
 	);
 

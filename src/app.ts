@@ -65,7 +65,7 @@ await app.register(helmetPlugin);
 
 await app.register(corsPlugin, {
 	origin: env.IS_DEV
-		? ['http://localhost:3000', 'http://localhost:4173']
+		? ['http://localhost:3000', 'http://localhost:4173', 'http://192.168.0.242']
 		: env.ORIGIN_URL,
 	credentials: true,
 });

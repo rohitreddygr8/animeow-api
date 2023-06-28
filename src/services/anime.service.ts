@@ -33,10 +33,6 @@ export const getEpisodeSources = async ({
 	return res;
 };
 
-console.log(
-	await getEpisodeSources({ episodeId: 'cliqovrrnejrgpk01y88u3eys' }),
-);
-
 export const getPopularAnime = async ({
 	page,
 	perPage,

@@ -40,6 +40,7 @@
 		"chalk": "^5.2.0",
 		"dotenv": "^16.0.3",
 		"fastify": "^4.17.0",
+		"google-auth-library": "^8.8.0",
 		"handlebars": "^4.7.7",
 		"http-status": "^1.6.2",
 		"jsonwebtoken": "^9.0.0",

@@ -2,7 +2,7 @@ import { FastifyPluginAsync, RouteHandler } from 'fastify';
 
 import { authRoles } from '../../constants/index.js';
 import { userController } from '../../controllers/index.js';
-import { auth, validate } from '../../middleware/index.js';
+import { checkAuth, validate } from '../../middleware/index.js';
 import { userValidation } from '../../validations/index.js';
 
 export const userRouterPlugin: FastifyPluginAsync = async (app) => {
@@ -10,7 +10,7 @@ export const userRouterPlugin: FastifyPluginAsync = async (app) => {
 		'/',
 		{
 			preHandler: [
-				auth(authRoles.ADMIN),
+				checkAuth(authRoles.ADMIN),
 				validate(userValidation.getUsersRequestSchema),
 			],
 		},
@@ -20,7 +20,7 @@ export const userRouterPlugin: FastifyPluginAsync = async (app) => {
 	app.get(
 		'/me',
 		{
-			preHandler: [auth(authRoles.USER)],
+			preHandler: [checkAuth(authRoles.USER)],
 		},
 		userController.getMyInfo,
 	);
@@ -28,7 +28,7 @@ export const userRouterPlugin: FastifyPluginAsync = async (app) => {
 	app.delete(
 		'/me',
 		{
-			preHandler: [auth(authRoles.USER)],
+			preHandler: [checkAuth(authRoles.USER)],
 		},
 		userController.deleteMyAccount,
 	);
@@ -37,7 +37,7 @@ export const userRouterPlugin: FastifyPluginAsync = async (app) => {
 		'/user',
 		{
 			preHandler: [
-				auth(authRoles.ADMIN),
+				checkAuth(authRoles.ADMIN),
 				validate(userValidation.deleteAccountRequestSchema),
 			],
 		},

@@ -1,5 +1,6 @@
 import { CookieSerializeOptions } from '@fastify/cookie';
 import { RouteHandler } from 'fastify';
+import { OAuth2Client } from 'google-auth-library';
 import httpStatus from 'http-status';
 import jwt from 'jsonwebtoken';
 
@@ -16,7 +17,7 @@ const refreshTokenCookieOptions: CookieSerializeOptions = {
 	path: '/v1/auth/refresh-token',
 };
 
-export const logOut: RouteHandler = (request, reply) => {
+export const logOut: RouteHandler = (_request, reply) => {
 	reply.clearCookie('refreshToken');
 	return reply.status(httpStatus.OK).send();
 };
@@ -34,8 +35,14 @@ export const logIn: RouteHandler<{ Body: LoginRequestBody }> = async (
 		if (user.is_banned) {
 			return reply.status(httpStatus.FORBIDDEN).send('User is banned');
 		}
-		const accessToken = authService.getAccessTokenFromId(user.id);
-		const refreshToken = authService.getRefreshTokenFromId(user.id);
+		const accessToken = authService.getAccessToken({
+			userId: user.id,
+			role: user.role,
+		});
+		const refreshToken = authService.getRefreshToken({
+			userId: user.id,
+			role: user.role,
+		});
 		return reply
 			.setCookie('refreshToken', refreshToken, refreshTokenCookieOptions)
 			.status(httpStatus.OK)
@@ -73,8 +80,14 @@ export const signUp: RouteHandler<{ Body: SignUpRequestBody }> = async (
 		if (user.is_banned) {
 			return reply.status(httpStatus.FORBIDDEN).send('User is banned');
 		}
-		const accessToken = authService.getAccessTokenFromId(user.id);
-		const refreshToken = authService.getRefreshTokenFromId(user.id);
+		const accessToken = authService.getAccessToken({
+			userId: user.id,
+			role: user.role,
+		});
+		const refreshToken = authService.getRefreshToken({
+			userId: user.id,
+			role: user.role,
+		});
 		return reply
 			.setCookie('refreshToken', refreshToken, refreshTokenCookieOptions)
 			.status(httpStatus.OK)
@@ -104,7 +117,10 @@ export const refreshAccessToken: RouteHandler = async (request, reply) => {
 		if (user.is_banned) {
 			return reply.status(httpStatus.FORBIDDEN).send('User is banned');
 		}
-		const accessToken = authService.getAccessTokenFromId(user.id);
+		const accessToken = authService.getAccessToken({
+			userId: user.id,
+			role: user.role,
+		});
 		return reply.status(httpStatus.OK).send({ accessToken, role: user.role });
 	} catch (err) {
 		if (err instanceof DatabaseError) {
@@ -125,3 +141,26 @@ export const refreshAccessToken: RouteHandler = async (request, reply) => {
 			.send(err instanceof Error && err.message);
 	}
 };
+
+// const client = new OAuth2Client(CLIENT_ID);
+
+// export const googleLogin: RouteHandler<{ Body: { accessToken: string } }> = (
+// 	request,
+// 	reply,
+// ) => {
+// 	async function verify() {
+// 		const ticket = await client.verifyIdToken({
+// 			idToken: request.body.accessToken,
+// 			audience: CLIENT_ID,
+// 		});
+// 		const payload = ticket.getPayload();
+// 		return payload;
+// 	}
+// 	verify()
+// 		.then((payload) => {
+// 			console.log(payload);
+// 		})
+// 		.catch(console.error);
+
+// 	return reply;
+// };

@@ -1,2 +1,2 @@
-export * from './auth.js';
+export * from './check-auth.js';
 export * from './validate.js';

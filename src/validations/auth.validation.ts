@@ -10,7 +10,7 @@ export const logInRequestSchema = z.object({
 export const signUpRequestSchema = z.object({
 	body: z.object({
 		email: z.string().nonempty().email(),
-		username: z.string().nonempty().optional(),
+		username: z.string().nonempty().nullish(),
 		password: z
 			.string()
 			.nonempty()
