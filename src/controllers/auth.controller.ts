@@ -78,10 +78,10 @@ export const signUp: RouteHandler<{ Body: SignUpRequestBody }> = async (
 			email,
 			username:
 				username ??
-				`${email.split('@')[0].replace(/[^a-zA-Z0-9\s]/g, '')}${getRandomNumber(
-					0,
-					10000,
-				)}`,
+				`${email
+					.split('@')[0]
+					.substring(0, 9)
+					.replace(/[^a-zA-Z0-9\s]/g, '')}${getRandomNumber(0, 10000)}`,
 			password_hash: hash,
 			salt,
 			role: authRoles.USER,
