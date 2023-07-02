@@ -17,7 +17,11 @@ import handlebars from 'handlebars';
 
 import { env } from './constants/index.js';
 import { connectToDb } from './database/index.js';
-import { animeRouterPlugin, authRouterPlugin } from './routes/v1/index.js';
+import {
+	animeRouterPlugin,
+	appRouterPlugin,
+	authRouterPlugin,
+} from './routes/v1/index.js';
 import { userRouterPlugin } from './routes/v1/user.route.js';
 
 export const app = fastify({
@@ -36,6 +40,7 @@ const v1Plugin: FastifyPluginAsync = async (app) => {
 	await app.register(animeRouterPlugin, { prefix: '/' });
 	await app.register(authRouterPlugin, { prefix: '/auth' });
 	await app.register(userRouterPlugin, { prefix: '/users' });
+	await app.register(appRouterPlugin, { prefix: '/app' });
 };
 
 await app.register(rateLimitPlugin, {
