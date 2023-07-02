@@ -20,6 +20,8 @@ export const setIsStreamingEnabled: RouteHandler<{
 		await appService.setIsStreamingEnabled(request.body.is_enabled);
 		return reply.status(httpStatus.OK).send();
 	} catch (err) {
+		console.log(err);
+
 		return reply.status(httpStatus.INTERNAL_SERVER_ERROR).send();
 	}
 };

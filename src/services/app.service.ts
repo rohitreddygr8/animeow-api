@@ -10,5 +10,8 @@ export const getIsStreamingEnabled = async () => {
 };
 
 export const setIsStreamingEnabled = async (value: boolean) => {
-	await SiteSettingsCollection.updateOne({}, { is_streaming_enabled: value });
+	await SiteSettingsCollection.updateOne(
+		{},
+		{ $set: { is_streaming_enabled: value } },
+	);
 };
