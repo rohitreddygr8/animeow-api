@@ -16,3 +16,19 @@ export type SignUpRequestBody = z.infer<
 export type RefreshTokenRequestCookies = z.infer<
 	typeof authValidation.refreshTokenRequestSchema
 >['cookies'];
+
+export type GetResetPasswordRequestQuery = z.infer<
+	typeof authValidation.getResetPasswordRequestSchema
+>['query'];
+
+export type PostResetPasswordRequestBody = z.infer<
+	typeof authValidation.postResetPasswordRequestSchema
+>['body'];
+
+export type PostResetPasswordRequestQuery = z.infer<
+	typeof authValidation.postResetPasswordRequestSchema
+>['query'];
+
+export type SendPasswordResetEmailQuery = z.infer<
+	typeof authValidation.sendPasswordResetEmailSchema
+>['query'];

@@ -29,4 +29,24 @@ export const authRouterPlugin: FastifyPluginAsync = async (app) => {
 		{ preHandler: [validate(authValidation.refreshTokenRequestSchema)] },
 		authController.refreshAccessToken as RouteHandler,
 	);
+
+	app.get(
+		'/reset-password',
+		{ preHandler: [validate(authValidation.getResetPasswordRequestSchema)] },
+		authController.getResetPassword as RouteHandler,
+	);
+
+	app.post(
+		'/reset-password',
+		{ preHandler: [validate(authValidation.postResetPasswordRequestSchema)] },
+		authController.postResetPassword as RouteHandler,
+	);
+
+	app.get(
+		'/send-password-reset-email',
+		{
+			preHandler: [validate(authValidation.sendPasswordResetEmailSchema)],
+		},
+		authController.sendPasswordResetEmail as RouteHandler,
+	);
 };

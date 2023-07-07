@@ -48,3 +48,7 @@ export const deleteUser = async (
 	}
 	return _IdToId(value);
 };
+
+export const updateUserById = async (id: string, payload: Partial<User>) => {
+	await Users.updateOne({ _id: new ObjectId(id) }, { $set: payload });
+};

@@ -18,6 +18,7 @@ export interface User {
 	username: string;
 	role: AuthRole;
 	is_banned: boolean;
+	reset_password_token: string;
 }
 
 export interface UserWithId extends User {

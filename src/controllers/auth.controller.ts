@@ -1,12 +1,18 @@
 import { CookieSerializeOptions } from '@fastify/cookie';
 import { RouteHandler } from 'fastify';
-import { OAuth2Client } from 'google-auth-library';
 import httpStatus from 'http-status';
 import jwt from 'jsonwebtoken';
 
 import { authRoles, env } from '../constants/index.js';
 import { authService, userService } from '../services/index.js';
-import { LoginRequestBody, SignUpRequestBody } from '../types/index.js';
+import {
+	GetResetPasswordRequestQuery,
+	LoginRequestBody,
+	PostResetPasswordRequestBody,
+	PostResetPasswordRequestQuery,
+	SendPasswordResetEmailQuery,
+	SignUpRequestBody,
+} from '../types/index.js';
 import {
 	DatabaseError,
 	getHash,
@@ -53,12 +59,8 @@ export const logIn: RouteHandler<{ Body: LoginRequestBody }> = async (
 			.status(httpStatus.OK)
 			.send({ accessToken, role: user.role });
 	} catch (err) {
-		if (err instanceof DatabaseError) {
-			if (err.message === 'does_not_exist') {
-				return reply
-					.status(httpStatus.UNAUTHORIZED)
-					.send('Invalid credentials');
-			}
+		if (err instanceof DatabaseError && err.message === 'does_not_exist') {
+			return reply.status(httpStatus.UNAUTHORIZED).send('Invalid credentials');
 		}
 
 		reply.log.error(err);
@@ -86,10 +88,16 @@ export const signUp: RouteHandler<{ Body: SignUpRequestBody }> = async (
 			salt,
 			role: authRoles.USER,
 			is_banned: false,
+			reset_password_token: '',
 		});
-		if (user.is_banned) {
-			return reply.status(httpStatus.FORBIDDEN).send('User is banned');
-		}
+
+		await userService.updateUserById(user.id, {
+			reset_password_token: jwt.sign(
+				{ sub: user.id, iat: Date.now() },
+				env.JWT_REFRESH_TOKEN_SECRET,
+			),
+		});
+
 		const accessToken = authService.getAccessToken({
 			userId: user.id,
 			role: user.role,
@@ -103,12 +111,10 @@ export const signUp: RouteHandler<{ Body: SignUpRequestBody }> = async (
 			.status(httpStatus.OK)
 			.send({ accessToken, role: user.role });
 	} catch (err) {
-		if (err instanceof DatabaseError) {
-			if (err.message === 'already_exists') {
-				return reply
-					.status(httpStatus.CONFLICT)
-					.send('User with this email already exists');
-			}
+		if (err instanceof DatabaseError && err.message === 'already_exists') {
+			return reply
+				.status(httpStatus.CONFLICT)
+				.send('User with this email already exists');
 		}
 		reply.log.error(err);
 		return reply.status(httpStatus.INTERNAL_SERVER_ERROR).send();
@@ -133,17 +139,103 @@ export const refreshAccessToken: RouteHandler = async (request, reply) => {
 		});
 		return reply.status(httpStatus.OK).send({ accessToken, role: user.role });
 	} catch (err) {
-		if (err instanceof DatabaseError) {
-			if (err.message === 'does_not_exist') {
-				return reply
-					.status(httpStatus.UNAUTHORIZED)
-					.send('User does not exist');
-			}
+		if (err instanceof DatabaseError && err.message === 'does_not_exist') {
+			return reply.status(httpStatus.UNAUTHORIZED).send('User does not exist');
 		}
 		if (err instanceof jwt.TokenExpiredError) {
 			return reply
 				.status(httpStatus.UNAUTHORIZED)
 				.send('Refresh token has expired');
+		}
+		reply.log.error(err);
+		return reply
+			.status(httpStatus.INTERNAL_SERVER_ERROR)
+			.send(err instanceof Error && err.message);
+	}
+};
+
+export const getResetPassword: RouteHandler<{
+	Querystring: GetResetPasswordRequestQuery;
+}> = async (request, reply) => {
+	const { token } = request.query;
+	try {
+		const { sub } = jwt.verify(
+			token,
+			env.JWT_REFRESH_TOKEN_SECRET,
+		) as jwt.JwtPayload;
+		const user = await userService.getUser({ id: sub });
+		if (user.reset_password_token !== token) {
+			return reply
+				.status(httpStatus.GONE)
+				.send('Link has expired / is invalid');
+		}
+		return reply.view('reset-password', { token });
+	} catch (err) {
+		if (err instanceof DatabaseError && err.message == 'does_not_exist') {
+			return reply.status(httpStatus.NOT_FOUND).send('User does not exist');
+		}
+		if (err instanceof jwt.JsonWebTokenError) {
+			return reply.status(httpStatus.UNAUTHORIZED).send('Invalid token');
+		}
+		reply.log.error(err);
+		return reply
+			.status(httpStatus.INTERNAL_SERVER_ERROR)
+			.send(err instanceof Error && err.message);
+	}
+};
+
+export const postResetPassword: RouteHandler<{
+	Body: PostResetPasswordRequestBody;
+	Querystring: PostResetPasswordRequestQuery;
+}> = async (request, reply) => {
+	const { newPassword } = request.body;
+	const { token } = request.query;
+	try {
+		const { sub } = jwt.verify(
+			token,
+			env.JWT_REFRESH_TOKEN_SECRET,
+		) as jwt.JwtPayload;
+		const user = await userService.getUser({ id: sub });
+		if (user.reset_password_token !== token) {
+			return reply
+				.status(httpStatus.GONE)
+				.send('Link has expired / is invalid');
+		}
+		const { hash, salt } = getHashAndSalt(newPassword);
+		await userService.updateUserById(sub as string, {
+			password_hash: hash,
+			salt,
+			reset_password_token: jwt.sign(
+				{ sub: user.id, iat: Date.now() },
+				env.JWT_REFRESH_TOKEN_SECRET,
+			),
+		});
+		return reply.view('reset-password-success');
+	} catch (err) {
+		if (err instanceof DatabaseError && err.message == 'does_not_exist') {
+			return reply.status(httpStatus.NOT_FOUND).send('User does not exist');
+		}
+		if (err instanceof jwt.JsonWebTokenError) {
+			return reply.status(httpStatus.UNAUTHORIZED).send('Invalid token');
+		}
+		reply.log.error(err);
+		return reply
+			.status(httpStatus.INTERNAL_SERVER_ERROR)
+			.send(err instanceof Error && err.message);
+	}
+};
+
+export const sendPasswordResetEmail: RouteHandler<{
+	Querystring: SendPasswordResetEmailQuery;
+}> = async (request, reply) => {
+	const { email } = request.query;
+	try {
+		await userService.getUser({ email });
+		await authService.sendPasswordResetEmail(email);
+		return reply.status(httpStatus.OK).send();
+	} catch (err) {
+		if (err instanceof DatabaseError && err.message == 'does_not_exist') {
+			return reply.status(httpStatus.NOT_FOUND).send('User does not exist');
 		}
 		reply.log.error(err);
 		return reply
