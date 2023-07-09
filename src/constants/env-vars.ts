@@ -19,6 +19,9 @@ const envSchema = z
 		JWT_ACCESS_TOKEN_SECRET: z.string().nonempty(),
 		JWT_REFRESH_TOKEN_SECRET: z.string().nonempty(),
 		ORIGIN_URL: z.string().nonempty(),
+		S3_ACCESS_KEY_ID: z.string().nonempty(),
+		S3_ACCESS_KEY_SECRET: z.string().nonempty(),
+		S3_BUCKET_NAME: z.string().nonempty(),
 	})
 	.transform((val) => ({
 		...val,
@@ -37,6 +40,9 @@ const envVariables: Partial<Record<keyof z.infer<typeof envSchema>, unknown>> =
 		JWT_ACCESS_TOKEN_SECRET: process.env.JWT_ACCESS_TOKEN_SECRET,
 		JWT_REFRESH_TOKEN_SECRET: process.env.JWT_REFRESH_TOKEN_SECRET,
 		ORIGIN_URL: process.env.ORIGIN_URL,
+		S3_ACCESS_KEY_ID: process.env.S3_ACCESS_KEY_ID,
+		S3_ACCESS_KEY_SECRET: process.env.S3_ACCESS_KEY_SECRET,
+		S3_BUCKET_NAME: process.env.S3_BUCKET_NAME,
 	};
 
 export const env = envSchema.parse(envVariables);

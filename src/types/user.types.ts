@@ -19,6 +19,8 @@ export interface User {
 	role: AuthRole;
 	is_banned: boolean;
 	reset_password_token: string;
+	image_url?: string;
+	createdAt: number;
 }
 
 export interface UserWithId extends User {

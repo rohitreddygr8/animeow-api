@@ -1,0 +1,56 @@
+@font-face {
+	font-family: 'Mona Sans';
+	src: url('./mona-sans.woff2');
+}
+
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+	font-family: 'Mona Sans';
+}
+
+html {
+	--success-clr: #08a108;
+	--error-clr: red;
+	--warning-clr: #ff4800;
+	--grey-100: #bfbfbf;
+	--grey-200: #808080;
+	--grey-300: #242424;
+	--coral-100: #e31c4e;
+	--coral-200: hsl(345, 49%, 35%);
+	--dark: #0a0d12;
+	--light: #ffffff;
+
+	-webkit-tap-highlight-color: transparent;
+}
+
+body {
+	background-color: var(--dark);
+	height: 100vh;
+	width: 100vw;
+	overflow: hidden;
+}
+
+::-webkit-scrollbar {
+	background-color: rgba(128, 128, 128, 0.25);
+	width: 0.125rem;
+	height: 0.125rem;
+}
+
+::-webkit-scrollbar-thumb {
+	background-color: var(--coral-200);
+	border-radius: 1.5rem;
+}
+
+a {
+	text-decoration: none;
+	color: inherit;
+	display: inline-flex;
+	justify-content: center;
+	align-items: center;
+}
+
+svg {
+	vertical-align: bottom;
+}

@@ -43,4 +43,10 @@ export const userRouterPlugin: FastifyPluginAsync = async (app) => {
 		},
 		userController.deleteAccount as RouteHandler,
 	);
+
+	app.put(
+		'/profile-picture',
+		{ preHandler: [checkAuth(authRoles.USER)] },
+		userController.updateProfilePicture,
+	);
 };

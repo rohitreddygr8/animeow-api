@@ -42,3 +42,13 @@ export const deleteAccount: RouteHandler<{
 	await userService.deleteUser({ id: request.body.userId });
 	return reply.status(httpStatus.NO_CONTENT).send();
 };
+
+export const updateProfilePicture: RouteHandler = async (request, reply) => {
+	const file = await request.file();
+	if (!file) {
+		return reply.status(httpStatus.BAD_REQUEST).send();
+	}
+	const url = await userService.updateUserProfilePicture(file, request.user.id);
+	await userService.updateUserById(request.user.id, { image_url: url });
+	return reply.status(httpStatus.CREATED).send();
+};

@@ -89,6 +89,7 @@ export const signUp: RouteHandler<{ Body: SignUpRequestBody }> = async (
 			role: authRoles.USER,
 			is_banned: false,
 			reset_password_token: '',
+			createdAt: Date.now(),
 		});
 
 		await userService.updateUserById(user.id, {

@@ -14,6 +14,7 @@ import webSocketsPlugin from '@fastify/websocket';
 import chalk from 'chalk';
 import { fastify, FastifyPluginAsync } from 'fastify';
 import handlebars from 'handlebars';
+import httpStatus from 'http-status';
 
 import { env } from './constants/index.js';
 import { connectToDb } from './database/index.js';
@@ -41,6 +42,9 @@ const v1Plugin: FastifyPluginAsync = async (app) => {
 	await app.register(authRouterPlugin, { prefix: '/auth' });
 	await app.register(userRouterPlugin, { prefix: '/users' });
 	await app.register(appRouterPlugin, { prefix: '/app' });
+	app.get('/', (_, reply) => {
+		return reply.view('home');
+	});
 };
 
 await app.register(rateLimitPlugin, {
@@ -66,7 +70,7 @@ await app.register(viewPlugin, {
 	},
 });
 
-await app.register(helmetPlugin);
+await app.register(helmetPlugin, { contentSecurityPolicy: false });
 
 await app.register(corsPlugin, {
 	origin: env.IS_DEV
@@ -94,7 +98,7 @@ await app.register(v1Plugin, { prefix: '/v1' });
 app.decorateRequest('user', null);
 
 app.get('/', (_, reply) => {
-	return reply.view('home');
+	return reply.redirect(httpStatus.TEMPORARY_REDIRECT, '/v1');
 });
 
 export const startServer = async () => {
