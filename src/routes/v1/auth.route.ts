@@ -49,4 +49,6 @@ export const authRouterPlugin: FastifyPluginAsync = async (app) => {
 		},
 		authController.sendPasswordResetEmail as RouteHandler,
 	);
+
+	app.get('/oauth2/google', authController.googleLogin);
 };

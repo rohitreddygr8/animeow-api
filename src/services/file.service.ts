@@ -25,6 +25,14 @@ export const uploadFileToBucket = async ({
 	return `https://${bucket}.s3.${region}.amazonaws.com/${key}`;
 };
 
+export const deleteFileFromBucket = async ({
+	key,
+	bucket,
+}: {
+	key: string;
+	bucket: string;
+}) => await s3.deleteObject({ Bucket: bucket, Key: key }).promise();
+
 export const uploadImageToBucket = async ({
 	key,
 	body,
@@ -37,3 +45,11 @@ export const uploadImageToBucket = async ({
 		body,
 		bucket: env.S3_BUCKET_NAME,
 	});
+
+export const deleteImageFromBucket = async ({
+	key,
+	bucket,
+}: {
+	key: string;
+	bucket: string;
+}) => await deleteFileFromBucket({ key: `images/${key}`, bucket });

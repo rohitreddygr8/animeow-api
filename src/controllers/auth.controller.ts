@@ -245,6 +245,10 @@ export const sendPasswordResetEmail: RouteHandler<{
 	}
 };
 
+export const googleLogin: RouteHandler = async (request, reply) => {
+	return reply.redirect(httpStatus.TEMPORARY_REDIRECT, 'https://google.com');
+};
+
 // const client = new OAuth2Client(CLIENT_ID);
 
 // export const googleLogin: RouteHandler<{ Body: { accessToken: string } }> = (

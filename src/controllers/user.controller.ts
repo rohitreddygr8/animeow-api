@@ -1,12 +1,13 @@
 import { RouteHandler } from 'fastify';
 import httpStatus from 'http-status';
 
-import { userService } from '../services/index.js';
+import { env } from '../constants/index.js';
+import { fileService, userService } from '../services/index.js';
 import {
 	DeleteAccountRequestBody,
 	GetUsersRequestQuery,
 } from '../types/index.js';
-import { DatabaseError } from '../utils/index.js';
+import { DatabaseError, getRandomHexString } from '../utils/index.js';
 
 export const getUsers: RouteHandler<{
 	Querystring: GetUsersRequestQuery;
@@ -48,7 +49,33 @@ export const updateProfilePicture: RouteHandler = async (request, reply) => {
 	if (!file) {
 		return reply.status(httpStatus.BAD_REQUEST).send();
 	}
-	const url = await userService.updateUserProfilePicture(file, request.user.id);
+	const key =
+		request.user.image_url && request.user.image_url.split('/').at(-1);
+	if (key) {
+		await fileService.deleteImageFromBucket({
+			bucket: env.S3_BUCKET_NAME,
+			key,
+		});
+	}
+	const url = await fileService.uploadImageToBucket({
+		key: `${request.user.id}${getRandomHexString().slice(0, 10)}.${file.mimetype
+			.split('/')
+			.at(-1)}`,
+		body: await file.toBuffer(),
+	});
 	await userService.updateUserById(request.user.id, { image_url: url });
 	return reply.status(httpStatus.CREATED).send();
+};
+
+export const deleteProfilePicture: RouteHandler = async (request, reply) => {
+	const key =
+		request.user.image_url && request.user.image_url.split('/').at(-1);
+	if (key) {
+		await fileService.deleteImageFromBucket({
+			bucket: env.S3_BUCKET_NAME,
+			key,
+		});
+		await userService.updateUserById(request.user.id, { image_url: undefined });
+	}
+	return reply.status(httpStatus.OK).send();
 };

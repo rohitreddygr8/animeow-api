@@ -1,10 +1,8 @@
-import { MultipartFile } from '@fastify/multipart';
 import { ObjectId } from 'mongodb';
 
 import { Users } from '../database/index.js';
 import { User, UserWithId } from '../types/index.js';
 import { _IdToId, DatabaseError } from '../utils/index.js';
-import * as fileService from './file.service.js';
 
 export const getUsers = async (
 	filter: Partial<User>,
@@ -53,14 +51,4 @@ export const deleteUser = async (
 
 export const updateUserById = async (id: string, payload: Partial<User>) => {
 	await Users.updateOne({ _id: new ObjectId(id) }, { $set: payload });
-};
-
-export const updateUserProfilePicture = async (
-	imageFile: MultipartFile,
-	userId: string,
-) => {
-	return await fileService.uploadImageToBucket({
-		key: `${userId}.${imageFile.filename.split('.').at(-1)}`,
-		body: await imageFile.toBuffer(),
-	});
 };

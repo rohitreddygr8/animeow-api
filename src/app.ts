@@ -91,7 +91,7 @@ await app.register(eTagPlugin);
 
 await app.register(formBodyPlugin);
 
-await app.register(multipartPlugin);
+await app.register(multipartPlugin, { limits: { fileSize: 1024 * 1024 * 3 } });
 
 await app.register(v1Plugin, { prefix: '/v1' });
 
